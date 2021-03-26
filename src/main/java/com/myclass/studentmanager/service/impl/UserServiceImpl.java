@@ -16,7 +16,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
-    public UserServiceImpl(UserRepository userRepository){
+    public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -24,10 +24,10 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> getAll() {
         List<UserDto> userDtoList = new ArrayList<>();
         List<User> users = userRepository.findAll();
-        if(users.isEmpty()){
+        if (users.isEmpty()) {
             return null;
         }
-        for (User user: users) {
+        for (User user : users) {
             UserDto dto = new UserDto();
             dto.setEmail(user.getEmail());
             dto.setFullName(user.getFullName());
@@ -53,23 +53,50 @@ public class UserServiceImpl implements UserService {
             user.setRoleId(dto.getRoleId());
             userRepository.save(user);
             return 0;
-        }catch (Exception e) {
+        } catch (Exception e) {
             return -1;
         }
     }
 
     @Override
     public int deleteById(int id) {
-        return 0;
+        if (findById(id) != null) {
+            userRepository.deleteById(id);
+            return 0;
+        }
+        return -1;
     }
 
     @Override
     public int edit(UserEditDto dto) {
+        User user = userRepository.findById(dto.getId()).orElse(null);
+        if(user == null){
+            return -1;
+        }
+        user.setEmail(dto.getEmail());
+        user.setFullName(dto.getFullName());
+        if (dto.getPassword() != null) {
+            user.setPassword(new BCryptPasswordEncoder().encode(dto.getPassword()));
+        }
+        user.setAvatar("test");
+        user.setRoleId(dto.getRoleId());
+        userRepository.save(user);
         return 0;
     }
 
     @Override
     public UserDto findById(int id) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user != null) {
+            UserDto dto = new UserDto();
+            dto.setId(user.getId());
+            dto.setEmail(user.getEmail());
+            dto.setPassword(user.getPassword());
+            dto.setFullName(user.getFullName());
+            dto.setAvatar(user.getAvatar());
+            dto.setRoleId(user.getRoleId());
+            return dto;
+        }
         return null;
     }
 
