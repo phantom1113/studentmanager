@@ -26,4 +26,9 @@ public class Student {
 
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
     private Set<PaymentEachMonth> payments;
+
+    public Student(String fullName, String grade) {
+        this.fullName = fullName;
+        this.grade = grade;
+    }
 }
